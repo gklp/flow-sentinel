@@ -14,6 +14,10 @@
     </description>
     <modules>
         <module>flow-sentinel-core</module>
+        <module>flow-sentinel-store-redis</module>
+        <module>flow-sentinel-store-jdbc</module>
+        <module>flow-sentinel-store-inmemory</module>
+        <module>flow-sentinel-starter</module>
     </modules>
     <properties>
         <jacoco.version>0.8.12</jacoco.version>
