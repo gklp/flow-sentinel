@@ -1,6 +1,14 @@
 # FlowSentinel
 
-**FlowSentinel** is a Spring Boot Starter for securely managing multi-step processes on the server side.  
-It uses JSON-based flow definitions to map each step to controller methods, preventing step skipping and, by default, disallowing changes to completed step data.
+FlowSentinel is a Java-based framework for creating and managing **multi-step flows** in a structured, state-driven way.  
+It allows developers to define flows as JSON, validate each step, enforce navigation rules, and execute them with a framework-independent core engine.
 
-With session or token-based actor resolution, TTL management, Redis/JDBC store support, Actuator endpoints, and Prometheus metrics, FlowSentinel delivers a secure, observable, and extensible flow engine for enterprise applications.
+Key features:
+- **Flow Definition** – Describe multi-step processes with steps, transitions, and navigation rules.
+- **Validation** – Ensure data integrity and enforce immutability rules across completed steps.
+- **Navigation Control** – Support for simple and complex step navigation.
+- **Execution Engine** – Run flows programmatically with clear state management.
+- **Framework Independence** – The core works with any Java 17+ application, with optional integrations (e.g., Spring Boot starter).
+- **Extensibility** – Future modules for persistence (Redis, JDBC), linting, and developer tooling.
+
+FlowSentinel helps you **model**, **validate**, and **execute** complex flows reliably, making it ideal for onboarding processes, multi-step forms, wizards, and guided workflows.
