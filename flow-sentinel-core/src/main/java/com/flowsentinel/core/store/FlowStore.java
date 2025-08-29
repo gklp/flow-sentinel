@@ -12,9 +12,10 @@ import java.util.Optional;
  *   <li>Persist and retrieve flow meta-information.</li>
  *   <li>Persist and retrieve serialized flow snapshots.</li>
  *   <li>Delete snapshots and associated meta entries atomically.</li>
+ *   <li>Check flow existence efficiently.</li>
  * </ul>
- * <p>
- * author gokalp
+ *
+ * @author gokalp
  */
 public interface FlowStore {
 
@@ -22,14 +23,16 @@ public interface FlowStore {
      * Persists meta-information about a flow.
      *
      * @param meta must not be null
+     * @throws IllegalArgumentException if meta is null or invalid
      */
     void saveMeta(FlowMeta meta);
 
     /**
      * Loads meta-information for a given flow.
      *
-     * @param flowId flow identifier
+     * @param flowId flow identifier must not be blank
      * @return meta if found, otherwise empty
+     * @throws IllegalArgumentException if flowId is blank
      */
     Optional<FlowMeta> loadMeta(String flowId);
 
@@ -37,21 +40,34 @@ public interface FlowStore {
      * Persists a serialized snapshot of the flow's current state.
      *
      * @param snapshot must not be null
+     * @throws IllegalArgumentException if the snapshot is null or invalid
      */
     void saveSnapshot(FlowSnapshot snapshot);
 
     /**
      * Loads a serialized snapshot for a given flow.
      *
-     * @param flowId flow identifier
+     * @param flowId flow identifier must not be blank
      * @return snapshot if found, otherwise empty
+     * @throws IllegalArgumentException if flowId is blank
      */
     Optional<FlowSnapshot> loadSnapshot(String flowId);
 
     /**
-     * Deletes a snapshot and its associated meta-entry.
+     * Deletes a flow and all its associated data (snapshot and meta-information).
      *
-     * @param flowId flow identifier
+     * @param flowId flow identifier must not be blank
+     * @return true if any data was deleted, false if flow didn't exist
+     * @throws IllegalArgumentException if flowId is blank
      */
-    void deleteSnapshot(String flowId);
+    boolean delete(String flowId);
+
+    /**
+     * Checks whether a flow exists in the store.
+     *
+     * @param flowId flow identifier must not be blank
+     * @return true if flow exists, false otherwise
+     * @throws IllegalArgumentException if flowId is blank
+     */
+    boolean exists(String flowId);
 }
