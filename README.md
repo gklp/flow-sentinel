@@ -1,5 +1,7 @@
 # FlowSentinel
 
+[![CodeQL](https://github.com/gklp/flow-sentinel/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/gklp/flow-sentinel/actions/workflows/codeql-analysis.yml)
+
 FlowSentinel is a Java-based framework for creating and managing **multi-step flows** in a structured, state-driven way.  
 It allows developers to define flows as JSON, validate each step, enforce navigation rules, and execute them with a framework-independent core engine.
 
