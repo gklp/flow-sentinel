@@ -244,8 +244,7 @@ class RedisStorageAutoConfigurationTest {
         }
 
         @Override
-        public boolean delete(String flowId) {
-            return false;
+        public void delete(String flowId) {
         }
 
         @Override

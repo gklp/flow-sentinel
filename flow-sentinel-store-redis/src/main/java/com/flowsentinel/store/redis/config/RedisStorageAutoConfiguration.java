@@ -240,7 +240,6 @@ public class RedisStorageAutoConfiguration {
                 template,
                 props.getKeyPrefix(),
                 Duration.ofSeconds(ttlSeconds),
-                Duration.ofSeconds(ttlSeconds),
                 slidingEnabled,
                 resetPolicy,
                 Duration.ofSeconds(absoluteCapSeconds)

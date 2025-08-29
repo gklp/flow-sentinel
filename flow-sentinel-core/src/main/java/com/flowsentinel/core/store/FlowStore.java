@@ -57,10 +57,9 @@ public interface FlowStore {
      * Deletes a flow and all its associated data (snapshot and meta-information).
      *
      * @param flowId flow identifier must not be blank
-     * @return true if any data was deleted, false if flow didn't exist
      * @throws IllegalArgumentException if flowId is blank
      */
-    boolean delete(String flowId);
+    void delete(String flowId);
 
     /**
      * Checks whether a flow exists in the store.

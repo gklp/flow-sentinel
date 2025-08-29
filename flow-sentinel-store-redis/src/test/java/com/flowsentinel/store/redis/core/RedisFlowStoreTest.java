@@ -59,9 +59,7 @@ class RedisFlowStoreTest {
         store = new RedisFlowStore(
                 template,
                 "fs:flow:",
-                Duration.ofSeconds(30),
-                Duration.ofSeconds(30),
-                false
+                Duration.ofSeconds(30)
         );
     }
 
@@ -125,9 +123,7 @@ class RedisFlowStoreTest {
         store = new RedisFlowStore(
                 template,
                 "fs:flow:",
-                Duration.ofSeconds(1),
-                Duration.ofSeconds(1),
-                false
+                Duration.ofSeconds(1)
         );
         String flowId = "ridTtl1";
         FlowSnapshot snapshot = new FlowSnapshot(
@@ -237,9 +233,7 @@ class RedisFlowStoreTest {
         store = new RedisFlowStore(
                 template,
                 "fs:flow:",
-                Duration.ofMillis(800), // snapshot TTL ~0.8s
-                Duration.ofMillis(800),  // meta TTL ~0.8s
-                false
+                Duration.ofMillis(800) // snapshot TTL ~0.8s
         );
         String flowId = "ridNoSlidingTtl";
         FlowSnapshot snapshot = new FlowSnapshot(
@@ -255,7 +249,7 @@ class RedisFlowStoreTest {
         for (int i = 0; i < 3; i++) {
             assertThat(store.loadSnapshot(flowId)).isPresent();
             assertThat(store.loadMeta(flowId)).isPresent();
-            Thread.sleep(200);
+            Thread.sleep(150);
         }
 
         // Then: after >0.8 s total, entries should expire because read does not touch TTL
