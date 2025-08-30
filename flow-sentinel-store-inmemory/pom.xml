@@ -9,23 +9,33 @@
     </parent>
     <artifactId>flow-sentinel-store-inmemory</artifactId>
     <name>flow-sentinel-store-inmemory</name>
-    <description>FlowSentinel Core is the framework-agnostic execution engine for FlowSentinel.
-        It provides the essential domain model, flow execution logic, and I/O utilities
-        to define, validate, and run multistep flows with strict immutability.
-        Designed for maximum portability, it has no Spring or external framework dependencies,
-        enabling seamless integration into various platforms.
+    <description>Provides an in-memory implementation of the FlowSentinel storage mechanism. This module is ideal for development, testing, or
+        lightweight applications where data persistence is not required. It allows for rapid execution and validation of flows without the need for an
+        external database or storage service.
     </description>
     <properties>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <assertj.version>3.26.0</assertj.version>
         <slf4j.version>2.0.13</slf4j.version>
+        <caffeine.version>3.1.8</caffeine.version>
     </properties>
     <dependencies>
+        <!-- Core module (contains FlowStore interface & domain classes) -->
+        <dependency>
+            <groupId>com.gokalpkuscu.flowsentinel</groupId>
+            <artifactId>flow-sentinel-core</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
         <!-- Misc -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.version}</version>
         </dependency>
         <!-- Test dependencies -->
         <dependency>
