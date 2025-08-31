@@ -22,7 +22,7 @@ public class FlowSentinelInMemoryProperties {
          */
         ON_READ,
         /**
-         * Reset TTL upon write or update access.
+         * Reset TTL upon writing or update access.
          */
         ON_WRITE,
         /**
