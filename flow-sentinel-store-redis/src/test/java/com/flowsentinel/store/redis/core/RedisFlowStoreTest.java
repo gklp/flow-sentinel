@@ -1,7 +1,9 @@
 package com.flowsentinel.store.redis.core;
 
+import com.flowsentinel.core.id.StepId;
 import com.flowsentinel.core.store.FlowMeta;
 import com.flowsentinel.core.store.FlowSnapshot;
+import com.flowsentinel.store.redis.config.FlowSentinelRedisProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +17,7 @@ import redis.embedded.RedisServer;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.Duration;
-import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -59,7 +61,10 @@ class RedisFlowStoreTest {
         store = new RedisFlowStore(
                 template,
                 "fs:flow:",
-                Duration.ofSeconds(30)
+                Duration.ofSeconds(30),
+                false,
+                FlowSentinelRedisProperties.SlidingReset.NEVER,
+                Duration.ofSeconds(0)
         );
     }
 
@@ -87,10 +92,11 @@ class RedisFlowStoreTest {
         String flowId = "ridSnap1";
         FlowSnapshot snapshot = new FlowSnapshot(
                 flowId,
-                "{\"ok\":true}",
-                "application/json",
-                Instant.now(),
-                Instant.now()
+                StepId.of("TEST_STEP"),
+                false,
+                Map.of(
+                        "stepDto", "entity"
+                )
         );
 
         // When
@@ -102,19 +108,15 @@ class RedisFlowStoreTest {
                 .get()
                 .satisfies(s -> {
                     assertThat(s.flowId()).isEqualTo(flowId);
-                    assertThat(s.payload()).isEqualTo("{\"ok\":true}");
-                    assertThat(s.contentType()).isEqualTo("application/json");
+                    assertThat(s.attributes())
+                            .containsEntry("stepDto", "entity");
                 });
-
-        // And meta is created atomically if absent
-        assertThat(store.loadMeta(flowId)).isPresent();
 
         // When (delete)
         store.delete(flowId);
 
         // Then
         assertThat(store.loadSnapshot(flowId)).isEmpty();
-        assertThat(store.loadMeta(flowId)).isEmpty();
     }
 
     @Test
@@ -123,18 +125,21 @@ class RedisFlowStoreTest {
         store = new RedisFlowStore(
                 template,
                 "fs:flow:",
-                Duration.ofSeconds(1)
+                Duration.ofSeconds(1),
+                false,
+                FlowSentinelRedisProperties.SlidingReset.NEVER,
+                Duration.ofSeconds(0)
         );
         String flowId = "ridTtl1";
         FlowSnapshot snapshot = new FlowSnapshot(
                 flowId,
-                "{\"ttl\":true}",
-                "application/json",
-                Instant.now(),
-                Instant.now()
+                StepId.of("TEST_STEP"),
+                false,
+                Map.of("stepDto", "content")
         );
 
         // When
+        store.saveMeta(FlowMeta.createNew(flowId));
         store.saveSnapshot(snapshot);
 
         // Then (immediately present)
@@ -164,13 +169,12 @@ class RedisFlowStoreTest {
         // Given
         String flowId = "ridCorrupt";
         String metaKey = "fs:flow:" + flowId + ":meta"; // Manuel key format
-        // Malformed: not 5 fields (should be version|status|step|createdAtEpochMilli|updatedAtEpochMilli)
         template.opsForValue().set(metaKey, "0|NEW|INIT|123"); // Field 4 instead of 5
 
         // When / Then - AssertJ kullanarak exception test et
         assertThatThrownBy(() -> store.loadMeta(flowId))
                 .isInstanceOf(DataRetrievalFailureException.class)
-                .hasMessageContaining("Failed to load meta for flow: " + flowId);
+                .hasMessageContaining("Failed to deserialize FlowMeta for flow: " + flowId);
     }
 
     @Test
@@ -194,12 +198,12 @@ class RedisFlowStoreTest {
                         for (int i = 0; i < iterationsPerWriter; i++) {
                             FlowSnapshot snapshot = new FlowSnapshot(
                                     flowId,
-                                    "{\"writer\":" + writerId + ",\"i\":" + i + "}",
-                                    "application/json",
-                                    Instant.now(),
-                                    Instant.now()
+                                    StepId.of("PARALLEL_STEP"),
+                                    false,
+                                    Map.of("payload", "{\"writer\":" + writerId + ",\"i\":" + i + "}")
                             );
                             store.saveSnapshot(snapshot);
+                            store.saveMeta(FlowMeta.createNew(flowId));
                         }
                     } catch (Throwable t) {
                         errors.incrementAndGet();
@@ -233,17 +237,22 @@ class RedisFlowStoreTest {
         store = new RedisFlowStore(
                 template,
                 "fs:flow:",
-                Duration.ofMillis(800) // snapshot TTL ~0.8s
+                Duration.ofMillis(800), // snapshot TTL ~0.8s
+                false,
+                FlowSentinelRedisProperties.SlidingReset.NEVER,
+                Duration.ofSeconds(0)
         );
         String flowId = "ridNoSlidingTtl";
         FlowSnapshot snapshot = new FlowSnapshot(
                 flowId,
-                "{\"v\":1}",
-                "application/json",
-                Instant.now(),
-                Instant.now()
+                StepId.of("TEST_STEP"),
+                false,
+                Map.of(
+                        "stepDto", "content"
+                )
         );
         store.saveSnapshot(snapshot);
+        store.saveMeta(FlowMeta.createNew(flowId));
 
         // When: repeatedly read within the 0.8 s window (this should NOT extend TTL)
         for (int i = 0; i < 3; i++) {

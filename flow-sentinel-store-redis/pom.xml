@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.gokalpkuscu.flowsentinel</groupId>
         <artifactId>flow-sentinel</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
     <artifactId>flow-sentinel-store-redis</artifactId>
     <name>flow-sentinel-store-redis</name>
@@ -33,6 +33,10 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-parameter-names</artifactId>
         </dependency>
         <!-- Spring Boot AutoConfig support (for @AutoConfiguration classes) -->
         <dependency>

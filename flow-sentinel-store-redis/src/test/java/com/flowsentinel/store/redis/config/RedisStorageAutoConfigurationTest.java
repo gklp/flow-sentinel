@@ -1,5 +1,6 @@
 package com.flowsentinel.store.redis.config;
 
+import com.flowsentinel.core.runtime.FlowState;
 import com.flowsentinel.core.store.FlowMeta;
 import com.flowsentinel.core.store.FlowSnapshot;
 import com.flowsentinel.core.store.FlowStore;
@@ -250,6 +251,11 @@ class RedisStorageAutoConfigurationTest {
         @Override
         public boolean exists(String flowId) {
             return false;
+        }
+
+        @Override
+        public Optional<FlowState> find(String flowId) {
+            return Optional.empty();
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.flowsentinel.core.store;
 
+import com.flowsentinel.core.runtime.FlowState;
+
 import java.util.Optional;
 
 /**
@@ -52,6 +54,15 @@ public interface FlowStore {
      * @throws IllegalArgumentException if flowId is blank
      */
     Optional<FlowSnapshot> loadSnapshot(String flowId);
+
+    /**
+     * Loads a serialized snapshot for a given flow and reconstructs the FlowState.
+     *
+     * @param flowId flow identifier must not be blank
+     * @return state if found, otherwise empty
+     * @throws IllegalArgumentException if flowId is blank
+     */
+    Optional<FlowState> find(String flowId);
 
     /**
      * Deletes a flow and all its associated data (snapshot and meta-information).

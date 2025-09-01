@@ -1,5 +1,7 @@
 package com.flowsentinel.core.definition;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flowsentinel.core.id.StepId;
 
 import java.util.ArrayList;
@@ -31,6 +33,30 @@ public final class StepDefinition {
             throw new IllegalArgumentException("A step with SIMPLE navigation can declare only one transition.");
         }
         this.transitions = List.copyOf(b.transitions);
+    }
+
+    /**
+     * Constructor for Jackson deserialization.
+     *
+     * @param id             The step identifier.
+     * @param navigationType The navigation type (defaults to SIMPLE if null).
+     * @param transitions    The list of possible transitions from this step.
+     */
+    @JsonCreator
+    public StepDefinition(
+            @JsonProperty("id") StepId id,
+            @JsonProperty("navigationType") NavigationType navigationType,
+            @JsonProperty("transitions") List<Transition> transitions) {
+        this.id = Objects.requireNonNull(id, "The id cannot be null.");
+        this.navigationType = Objects.requireNonNullElse(navigationType, NavigationType.SIMPLE);
+
+        if (transitions == null || transitions.isEmpty()) {
+            throw new IllegalArgumentException("A step definition must declare at least one transition (or EOF).");
+        }
+        if (this.navigationType == NavigationType.SIMPLE && transitions.size() > 1) {
+            throw new IllegalArgumentException("A step with SIMPLE navigation can declare only one transition.");
+        }
+        this.transitions = List.copyOf(transitions);
     }
 
     /**

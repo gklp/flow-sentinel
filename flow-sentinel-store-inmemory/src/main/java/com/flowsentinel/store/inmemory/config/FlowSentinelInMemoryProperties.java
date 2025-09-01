@@ -1,5 +1,7 @@
 package com.flowsentinel.store.inmemory.config;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import java.time.Duration;
 
 /**
@@ -11,6 +13,7 @@ import java.time.Duration;
  *
  * @see com.flowsentinel.store.inmemory.core.InMemoryFlowStore
  */
+@ConfigurationProperties(prefix = "flow-sentinel.storage.in-memory")
 public class FlowSentinelInMemoryProperties {
 
     /**
@@ -30,6 +33,12 @@ public class FlowSentinelInMemoryProperties {
          */
         ON_READ_AND_WRITE
     }
+
+    /**
+     * Enables or disables the in-memory storage module.
+     * If no other storage is active, this is enabled by default.
+     */
+    private boolean enabled = false;
 
     /**
      * The base Time-To-Live (TTL) for flow records.
@@ -65,6 +74,14 @@ public class FlowSentinelInMemoryProperties {
      * Default: 10,000.
      */
     private long maximumSize = 10_000L;
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public Duration getTtl() {
         return ttl;

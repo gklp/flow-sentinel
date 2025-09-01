@@ -85,7 +85,8 @@ public class FlowSentinelRedisProperties {
     public enum SlidingReset {
         ON_READ,
         ON_WRITE,
-        ON_READ_AND_WRITE
+        ON_READ_AND_WRITE,
+        NEVER
     }
 
     /**

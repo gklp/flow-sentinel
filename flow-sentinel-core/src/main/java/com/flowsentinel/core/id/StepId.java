@@ -1,5 +1,8 @@
 package com.flowsentinel.core.id;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.Objects;
 
 /**
@@ -21,6 +24,7 @@ public final class StepId {
      * @return a new {@code StepId}
      * @throws IllegalArgumentException if the value is null or blank
      */
+    @JsonCreator
     public static StepId of(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("The stepId cannot be null or blank.");
@@ -33,6 +37,7 @@ public final class StepId {
      *
      * @return the identifier string
      */
+    @JsonValue
     public String value() {
         return value;
     }

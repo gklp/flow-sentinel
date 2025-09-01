@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.gokalpkuscu.flowsentinel</groupId>
         <artifactId>flow-sentinel</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
     <artifactId>flow-sentinel-core</artifactId>
     <name>flow-sentinel-core</name>
@@ -39,6 +39,12 @@
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.20.0-rc1</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

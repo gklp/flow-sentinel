@@ -1,11 +1,12 @@
-package com.flowsentinel.core.io;
+package com.flowsentinel.core.parser;
 
 /**
- * Unchecked exception thrown when parsing a flow definition fails.
+ * Unchecked exception thrown when a flow definition cannot be parsed.
  *
  * @author gokalp
  */
 public class FlowParseException extends RuntimeException {
+
     public FlowParseException(String message) {
         super(message);
     }

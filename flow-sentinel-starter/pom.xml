@@ -5,40 +5,78 @@
     <parent>
         <groupId>com.gokalpkuscu.flowsentinel</groupId>
         <artifactId>flow-sentinel</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </parent>
     <artifactId>flow-sentinel-starter</artifactId>
     <name>flow-sentinel-starter</name>
-    <description>FlowSentinel Core is the framework-agnostic execution engine for FlowSentinel.
-        It provides the essential domain model, flow execution logic, and I/O utilities
-        to define, validate, and run multistep flows with strict immutability.
-        Designed for maximum portability, it has no Spring or external framework dependencies,
-        enabling seamless integration into various platforms.
-    </description>
-    <properties>
-        <junit.jupiter.version>5.10.2</junit.jupiter.version>
-        <assertj.version>3.26.0</assertj.version>
-        <slf4j.version>2.0.13</slf4j.version>
-    </properties>
+    <description>Starter module for FlowSentinel, providing auto-configuration for Spring Boot applications.</description>
+
     <dependencies>
-        <!-- Misc -->
+        <!-- Core dependency, always required -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
+            <groupId>com.gokalpkuscu.flowsentinel</groupId>
+            <artifactId>flow-sentinel-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
-        <!-- Test dependencies -->
+        <!-- Spring Boot AutoConfiguration -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
-            <scope>test</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
-            <scope>test</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <!-- In-Memory storage, optional, user must include it explicitly -->
+        <dependency>
+            <groupId>com.gokalpkuscu.flowsentinel</groupId>
+            <artifactId>flow-sentinel-store-inmemory</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Redis storage, optional, user must include it explicitly -->
+        <dependency>
+            <groupId>com.gokalpkuscu.flowsentinel</groupId>
+            <artifactId>flow-sentinel-store-redis</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot BOM -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>3.3.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <build>
+        <plugins>
+            <!-- Compiler plugin for Java 17+ -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
+            <!-- Spring Boot plugin (for building auto-config jar) -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip> <!-- Skip repackaging for library modules -->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

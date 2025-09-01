@@ -1,12 +1,12 @@
 package com.flowsentinel.core.definition;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flowsentinel.core.id.FlowId;
 import com.flowsentinel.core.id.StepId;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Immutable aggregate root describing an entire flow: steps and initial step.
@@ -27,6 +27,42 @@ public final class FlowDefinition {
         }
         this.steps = Collections.unmodifiableMap(new LinkedHashMap<>(b.steps));
     }
+
+    /**
+     * Constructor for Jackson deserialization.
+     * This creator allows Jackson to construct an instance from a JSON structure where "steps" is an array.
+     *
+     * @param id          The flow identifier.
+     * @param initialStep The identifier of the first step.
+     * @param stepsList   A list of step definitions from the JSON array.
+     */
+    @JsonCreator
+    public FlowDefinition(
+            @JsonProperty("id") FlowId id,
+            @JsonProperty("initialStep") StepId initialStep,
+            @JsonProperty("steps") List<StepDefinition> stepsList) {
+        this.id = Objects.requireNonNull(id, "The id cannot be null.");
+        this.initialStep = Objects.requireNonNull(initialStep, "The initialStep cannot be null.");
+
+        if (stepsList == null) {
+            throw new IllegalArgumentException("The steps list cannot be null.");
+        }
+
+        // Convert list to map, using the step's ID as the key.
+        final Map<StepId, StepDefinition> stepsMap = stepsList.stream()
+                .collect(Collectors.toMap(
+                        StepDefinition::id,
+                        s -> s,
+                        (v1, v2) -> v1, // In case of duplicates, keep the first one
+                        LinkedHashMap::new)
+                );
+
+        if (!stepsMap.containsKey(this.initialStep)) {
+            throw new IllegalArgumentException("The initial step must be present in the steps map.");
+        }
+        this.steps = Collections.unmodifiableMap(stepsMap);
+    }
+
 
     /**
      * Returns the flow identifier.
@@ -67,54 +103,34 @@ public final class FlowDefinition {
 
     /**
      * Builder for {@link FlowDefinition}.
+     *
+     * @author gokalp
      */
-    public static final class Builder {
+    public static class Builder {
         private FlowId id;
         private StepId initialStep;
         private final Map<StepId, StepDefinition> steps = new LinkedHashMap<>();
 
-        /**
-         * Sets the flow identifier.
-         *
-         * @param id the flow id
-         * @return this builder
-         */
         public Builder id(FlowId id) {
             this.id = id;
             return this;
         }
 
-        /**
-         * Sets the initial step.
-         *
-         * @param step the initial step id
-         * @return this builder
-         */
-        public Builder initialStep(StepId step) {
-            this.initialStep = step;
+        public Builder initialStep(StepId initialStep) {
+            this.initialStep = initialStep;
             return this;
         }
 
-        /**
-         * Adds a step definition to the flow.
-         *
-         * @param step the step definition
-         * @return this builder
-         * @throws IllegalArgumentException if a step with the same id is already present
-         */
-        public Builder putStep(StepDefinition step) {
-            Objects.requireNonNull(step, "The step definition cannot be null.");
-            if (steps.put(step.id(), step) != null) {
-                throw new IllegalArgumentException("The step id '" + step.id() + "' is already defined.");
-            }
+        public Builder step(StepDefinition step) {
+            this.steps.put(step.id(), step);
             return this;
         }
 
-        /**
-         * Builds the immutable {@link FlowDefinition}.
-         *
-         * @return the built flow definition
-         */
+        public Builder steps(Map<StepId, StepDefinition> steps) {
+            this.steps.putAll(steps);
+            return this;
+        }
+
         public FlowDefinition build() {
             return new FlowDefinition(this);
         }

@@ -1,9 +1,10 @@
 package com.flowsentinel.core.definition;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flowsentinel.core.id.StepId;
 import com.flowsentinel.core.runtime.FlowState;
 
-import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -21,9 +22,26 @@ public final class Transition {
     private final Predicate<FlowState> condition;
 
     private Transition(StepId to, boolean endOfFlow, Predicate<FlowState> condition) {
+        if (to == null && !endOfFlow) {
+            throw new IllegalArgumentException("A transition must either lead to another step or be an end-of-flow transition.");
+        }
+        if (to != null && endOfFlow) {
+            throw new IllegalArgumentException("A transition cannot both lead to another step and be an end-of-flow transition.");
+        }
         this.to = to;
         this.endOfFlow = endOfFlow;
-        this.condition = condition == null ? s -> true : condition;
+        this.condition = condition;
+    }
+
+    /**
+     * Constructor for Jackson deserialization. Assumes unconditional transition.
+     *
+     * @param to        The target step identifier.
+     * @param endOfFlow Whether this transition ends the flow.
+     */
+    @JsonCreator
+    public Transition(@JsonProperty("to") StepId to, @JsonProperty("endOfFlow") Boolean endOfFlow) {
+        this(to, (endOfFlow != null && endOfFlow), state -> true);
     }
 
     /**
@@ -33,20 +51,17 @@ public final class Transition {
      * @return a transition that is always satisfied
      */
     public static Transition to(StepId to) {
-        Objects.requireNonNull(to, "The target stepId cannot be null.");
-        return new Transition(to, false, s -> true);
+        return new Transition(to, false, state -> true);
     }
 
     /**
      * Creates a conditional transition.
      *
-     * @param to the target step identifier
+     * @param to        the target step identifier
      * @param condition the predicate evaluated on the flow state
      * @return a conditional transition
      */
     public static Transition when(StepId to, Predicate<FlowState> condition) {
-        Objects.requireNonNull(to, "The target stepId cannot be null.");
-        Objects.requireNonNull(condition, "The condition predicate cannot be null.");
         return new Transition(to, false, condition);
     }
 
@@ -55,7 +70,9 @@ public final class Transition {
      *
      * @return a transition that ends the flow
      */
-    public static Transition eof() { return new Transition(null, true, s -> true); }
+    public static Transition eof() {
+        return new Transition(null, true, state -> true);
+    }
 
     /**
      * Returns {@code true} if the transition condition is satisfied for the provided state.
@@ -63,19 +80,25 @@ public final class Transition {
      * @param state the current flow state
      * @return whether the transition is satisfied
      */
-    public boolean isSatisfied(FlowState state) { return condition.test(state); }
+    public boolean isSatisfied(FlowState state) {
+        return condition.test(state);
+    }
 
     /**
      * Indicates that this transition marks the end of the flow.
      *
      * @return {@code true} if this transition ends the flow
      */
-    public boolean isEndOfFlow() { return endOfFlow; }
+    public boolean isEndOfFlow() {
+        return endOfFlow;
+    }
 
     /**
      * The target step identifier, or {@code null} if this is an EOF transition.
      *
      * @return the target {@code StepId} or {@code null}
      */
-    public StepId to() { return to; }
+    public StepId to() {
+        return to;
+    }
 }

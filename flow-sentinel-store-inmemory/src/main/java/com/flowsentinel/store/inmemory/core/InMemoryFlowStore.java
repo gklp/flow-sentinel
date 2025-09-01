@@ -1,5 +1,8 @@
 package com.flowsentinel.store.inmemory.core;
 
+import com.flowsentinel.core.definition.FlowDefinition;
+import com.flowsentinel.core.id.FlowId;
+import com.flowsentinel.core.runtime.FlowState;
 import com.flowsentinel.core.store.FlowMeta;
 import com.flowsentinel.core.store.FlowSnapshot;
 import com.flowsentinel.core.store.FlowStore;
@@ -54,7 +57,6 @@ public final class InMemoryFlowStore implements FlowStore {
      */
     public InMemoryFlowStore(@NonNull FlowSentinelInMemoryProperties properties) {
         this.properties = Objects.requireNonNull(properties, "FlowSentinelInMemoryProperties cannot be null.");
-        // Each cache is built with the same configuration but holds a different type.
         this.metaCache = buildCache();
         this.snapshotCache = buildCache();
     }
@@ -67,14 +69,6 @@ public final class InMemoryFlowStore implements FlowStore {
         this(new FlowSentinelInMemoryProperties());
     }
 
-    /**
-     * Factory method to construct a Caffeine cache instance based on the current properties.
-     * This centralizes cache configuration and applies the custom {@link FlowExpiry} logic.
-     * The generic {@code build()} method infers the required type from the assignment target.
-     *
-     * @param <T> The type of value the {@link CacheEntry} will hold (e.g., FlowMeta).
-     * @return A fully configured {@link Cache} instance.
-     */
     private <T> Cache<String, CacheEntry<T>> buildCache() {
         return Caffeine.newBuilder()
                 .maximumSize(properties.getMaximumSize())
@@ -113,6 +107,25 @@ public final class InMemoryFlowStore implements FlowStore {
     }
 
     @Override
+    public Optional<FlowState> find(@NonNull String flowId) {
+        if (flowId.isBlank()) {
+            throw new IllegalArgumentException("flowId cannot be blank.");
+        }
+
+        final Optional<FlowMeta> metaOpt = this.loadMeta(flowId);
+        final Optional<FlowSnapshot> snapshotOpt = this.loadSnapshot(flowId);
+
+        // Both metadata and a snapshot are required to fully reconstruct the flow state.
+        if (metaOpt.isPresent() && snapshotOpt.isPresent()) {
+            final FlowDefinition flowDefinition = new FlowDefinition.Builder().id(FlowId.of(metaOpt.get().flowId())).build();
+            // The FlowState is reconstructed from its constituent parts.
+            return Optional.of(FlowState.fromSnapshot(flowDefinition, snapshotOpt.get()));
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
     public void delete(@NonNull String flowId) {
         if (flowId.isBlank()) {
             throw new IllegalArgumentException("flowId cannot be blank.");
@@ -126,13 +139,13 @@ public final class InMemoryFlowStore implements FlowStore {
         if (flowId.isBlank()) {
             throw new IllegalArgumentException("flowId cannot be blank.");
         }
-        return metaCache.asMap().containsKey(flowId) || snapshotCache.asMap().containsKey(flowId);
+        // A flow's existence is defined solely by its metadata. A snapshot without meta
+        // is an orphan. Using asMap().containsKey() avoids triggering TTL resets.
+        return metaCache.asMap().containsKey(flowId);
     }
 
     /**
      * Implements Caffeine's {@link Expiry} interface to provide dynamic, per-entry expiration.
-     * This class is non-generic and uses wildcards ({@code CacheEntry<?>}) because its logic
-     * applies universally to any entry type, only depending on the creation timestamp.
      */
     private static final class FlowExpiry implements Expiry<String, CacheEntry<?>> {
 

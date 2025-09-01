@@ -2,7 +2,7 @@
  * Contains framework-independent I/O utilities for loading and parsing
  * flow definitions from various sources such as files, streams, and strings.
  * <p>
- * This package defines the {@link com.flowsentinel.core.io.FlowDefinitionParser}
+ * This package defines the {@link com.flowsentinel.core.parser.FlowDefinitionParser}
  * Service Provider Interface (SPI) and related helper classes for reading
  * {@link com.flowsentinel.core.definition.FlowDefinition} instances without
  * introducing dependencies on external frameworks.
@@ -11,7 +11,7 @@
  * <ul>
  *     <li>Framework-agnostic — parsing implementations are provided in other modules.</li>
  *     <li>Immutable results — parsing produces immutable flow definitions.</li>
- *     <li>Clear error handling via {@link com.flowsentinel.core.io.FlowParseException}.</li>
+ *     <li>Clear error handling via {@link com.flowsentinel.core.parser.FlowParseException}.</li>
  * </ul>
  *
  * <h2>Example Usage</h2>
@@ -24,4 +24,4 @@
  * @author gokalp
  * @since 1.0
  */
-package com.flowsentinel.core.io;
+package com.flowsentinel.core.parser;
