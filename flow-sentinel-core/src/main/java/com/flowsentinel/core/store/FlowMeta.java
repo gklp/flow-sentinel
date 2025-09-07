@@ -1,4 +1,7 @@
+
 package com.flowsentinel.core.store;
+
+import com.flowsentinel.core.id.FlowContext;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -6,21 +9,23 @@ import java.util.Objects;
 /**
  * Immutable metadata that represents the current state of a flow.
  *
- * <p>Holds high-level status, the last/current step, and a version used for optimistic locking.
+ * <p>Holds high-level status, the last/current step, context information,
+ * and a version used for optimistic locking.
  * Timestamps are UTC instants. Instances are immutable and safe to share.</p>
  *
  * <ul>
+ *   <li><b>flowContext</b>: flow identity and partitioning information</li>
  *   <li><b>status</b>: engine-level state (e.g., "NEW", "RUNNING", "COMPLETED", "FAILED")</li>
  *   <li><b>step</b>: last completed or current step identifier</li>
  *   <li><b>version</b>: monotonic version for optimistic locking</li>
  * </ul>
  *
- * <p>Use {@link #createNew(String)} to construct an initial meta.</p>
+ * <p>Use {@link #createNew(FlowContext)} to construct an initial meta.</p>
  * <p>
  * author gokalp
  */
 public record FlowMeta(
-        String flowId,
+        FlowContext flowContext,
         String status,
         String step,
         int version,
@@ -32,7 +37,7 @@ public record FlowMeta(
      * Canonical constructor that enforces basic invariants.
      */
     public FlowMeta {
-        flowId = normalizeRequired(flowId, "flowId");
+        flowContext = Objects.requireNonNull(flowContext, "flowContext must not be null");
         status = normalizeRequired(status, "status");
         step = normalizeRequired(step, "step");
         if (version < 0) {
@@ -46,12 +51,45 @@ public record FlowMeta(
      * Creates an initial meta for a new flow with sensible defaults.
      * status=NEW, step=INIT, version=0, timestamps=now.
      *
+     * @param flowContext flow context containing identity and partition information
+     * @return a new {@link FlowMeta} instance
+     */
+    public static FlowMeta createNew(FlowContext flowContext) {
+        var now = Instant.now();
+        return new FlowMeta(flowContext, "NEW", "INIT", 0, now, now);
+    }
+
+    /**
+     * Backward compatibility method - creates FlowMeta from flowId only.
+     * Uses anonymous flow context.
+     *
      * @param flowId unique flow identifier
      * @return a new {@link FlowMeta} instance
      */
+    @Deprecated(since = "2.0.0", forRemoval = true)
     public static FlowMeta createNew(String flowId) {
-        var now = Instant.now();
-        return new FlowMeta(flowId, "NEW", "INIT", 0, now, now);
+        return createNew(FlowContext.anonymous(flowId));
+    }
+
+    /**
+     * Convenience method to get flowId from context.
+     */
+    public String flowId() {
+        return flowContext.flowId();
+    }
+
+    /**
+     * Convenience method to get ownerId from context.
+     */
+    public String ownerId() {
+        return flowContext.ownerId();
+    }
+
+    /**
+     * Convenience method to get effective partition key from context.
+     */
+    public String getEffectivePartitionKey() {
+        return flowContext.getEffectivePartitionKey();
     }
 
     private static String normalizeRequired(String s, String field) {
@@ -68,7 +106,7 @@ public record FlowMeta(
      * @return new {@link FlowMeta} with version+1 and updatedAt=now
      */
     public FlowMeta nextVersion() {
-        return new FlowMeta(flowId, status, step, version + 1, createdAt, Instant.now());
+        return new FlowMeta(flowContext, status, step, version + 1, createdAt, Instant.now());
     }
 
     /**
@@ -79,7 +117,7 @@ public record FlowMeta(
      * @return updated {@link FlowMeta}
      */
     public FlowMeta withState(String newStatus, String newStep) {
-        return new FlowMeta(flowId, normalizeRequired(newStatus, "status"),
+        return new FlowMeta(flowContext, normalizeRequired(newStatus, "status"),
                 normalizeRequired(newStep, "step"), version, createdAt, Instant.now());
     }
 }

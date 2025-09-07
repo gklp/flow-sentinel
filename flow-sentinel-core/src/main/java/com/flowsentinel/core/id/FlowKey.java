@@ -1,7 +1,6 @@
 package com.flowsentinel.core.id;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 /**
  * The composite key that uniquely identifies a flow instance.
@@ -14,8 +13,17 @@ import java.util.StringJoiner;
 public record FlowKey(String flowName, String ownerId, String flowId) {
 
     public FlowKey {
-        Objects.requireNonNull(flowName, "flowName cannot be null");
-        Objects.requireNonNull(flowId, "flowId cannot be null");
+        Objects.requireNonNull(flowName, "flowName cannot be null.");
+        Objects.requireNonNull(flowId, "flowId cannot be null.");
+        // ownerId can be null for anonymous flows
+    }
+
+    /**
+     * Alias for flowName to support definition registry lookup.
+     * @return the flowName which represents the definition name
+     */
+    public String definitionName() {  // 🆕 NEW METHOD!
+        return flowName;
     }
 
     /**
@@ -26,10 +34,9 @@ public record FlowKey(String flowName, String ownerId, String flowId) {
      * @return A flattened string key.
      */
     public String toStorageKey() {
-        return new StringJoiner(":")
-                .add(flowName)
-                .add(ownerId != null ? ownerId : "unowned")
-                .add(flowId)
-                .toString();
+        if (ownerId == null || ownerId.isBlank()) {
+            return flowName + ":anonymous:" + flowId;
+        }
+        return flowName + ":" + ownerId + ":" + flowId;
     }
 }

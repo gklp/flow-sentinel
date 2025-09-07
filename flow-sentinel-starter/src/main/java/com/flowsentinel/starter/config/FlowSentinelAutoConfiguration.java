@@ -1,5 +1,6 @@
 package com.flowsentinel.starter.config;
 
+import com.flowsentinel.core.definition.FlowDefinitionProvider;
 import com.flowsentinel.core.engine.DefaultFlowEngine;
 import com.flowsentinel.core.engine.FlowEngine;
 import com.flowsentinel.core.parser.FlowDefinitionParser;
@@ -32,8 +33,8 @@ public class FlowSentinelAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public FlowEngine flowEngine(FlowStore flowStore) {
-        return new DefaultFlowEngine(flowStore);
+    public FlowEngine flowEngine(FlowStore flowStore, FlowDefinitionProvider flowDefinitionProvider) {
+        return new DefaultFlowEngine(flowStore, flowDefinitionProvider);
     }
 
     @Bean

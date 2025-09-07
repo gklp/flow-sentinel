@@ -1,5 +1,6 @@
 package com.flowsentinel.store.redis.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flowsentinel.core.store.FlowStore;
 import com.flowsentinel.store.redis.core.RedisFlowStore;
 import io.lettuce.core.resource.ClientResources;
@@ -121,17 +122,15 @@ public class RedisStorageAutoConfiguration {
         @ConditionalOnMissingBean(FlowStore.class)
         public FlowStore redisFlowStore(
                 @Qualifier("flowSentinelRedisConnectionFactory") RedisConnectionFactory connectionFactory,
+                ObjectMapper objectMapper,
                 FlowSentinelRedisProperties properties) {
 
             log.debug("Creating RedisFlowStore with DEDICATED connection factory.");
             StringRedisTemplate template = new StringRedisTemplate(connectionFactory);
             return new RedisFlowStore(
                     template,
-                    properties.getKeyPrefix(),
-                    Duration.ofSeconds(properties.getTtlSeconds()),
-                    properties.isSlidingEnabled(),
-                    properties.getSlidingReset(),
-                    Duration.ofSeconds(properties.getAbsoluteTtlSeconds())
+                    objectMapper,
+                    properties
             );
         }
     }
@@ -164,18 +163,22 @@ public class RedisStorageAutoConfiguration {
         @ConditionalOnBean(RedisConnectionFactory.class)
         public FlowStore redisFlowStore(
                 RedisConnectionFactory connectionFactory, // Injects the app's primary/single factory
+                ObjectMapper objectMapper,
                 FlowSentinelRedisProperties properties) {
+
+            if (connectionFactory instanceof LettuceConnectionFactory lettuce) {
+                lettuce.setValidateConnection(true);
+                lettuce.setShareNativeConnection(false); // Thread safety
+            }
 
             log.info("FlowSentinel Redis: using SHARED RedisConnectionFactory from application context.");
             log.debug("FlowSentinel Redis (shared) factory type: {}", connectionFactory.getClass().getSimpleName());
             StringRedisTemplate template = new StringRedisTemplate(connectionFactory);
+            template.setEnableTransactionSupport(true);
             return new RedisFlowStore(
                     template,
-                    properties.getKeyPrefix(),
-                    Duration.ofSeconds(properties.getTtlSeconds()),
-                    properties.isSlidingEnabled(),
-                    properties.getSlidingReset(),
-                    Duration.ofSeconds(properties.getAbsoluteTtlSeconds())
+                    objectMapper,
+                    properties
             );
         }
     }

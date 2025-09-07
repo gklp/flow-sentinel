@@ -21,6 +21,7 @@ import redis.embedded.RedisServer;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -254,8 +255,19 @@ class RedisStorageAutoConfigurationTest {
         }
 
         @Override
-        public Optional<FlowState> find(String flowId) {
-            return Optional.empty();
+        public int invalidateByPartition(String partitionKey) {
+            return 0;
         }
+
+        @Override
+        public Set<String> listActiveFlows(String partitionKey) {
+            return Set.of();
+        }
+
+        @Override
+        public int bulkDelete(Set<String> flowIds) {
+            return 0;
+        }
+
     }
 }

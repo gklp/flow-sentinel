@@ -1,28 +1,30 @@
+
 package com.flowsentinel.starter.web.provider;
 
-import com.flowsentinel.core.id.OwnerContext;
+import com.flowsentinel.core.id.FlowContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * A provider responsible for extracting the {@link OwnerContext} from a request.
- * The context includes the flow's session identifier (flowId) and its owner's identifier (ownerId).
+ * A provider responsible for extracting the {@link FlowContext} from a request.
+ * The context includes the flow's session identifier (flowId), its owner's identifier (ownerId),
+ * and partitioning information (partitionKey).
  */
 public interface FlowIdProvider {
 
     /**
-     * Provides the owner and session context from the incoming request.
+     * Provides the flow context from the incoming request.
      *
-     * @return An {@link OwnerContext} containing the flow and owner IDs.
+     * @return A {@link FlowContext} containing the flow, owner, and partition information.
      */
-    OwnerContext provide();
+    com.flowsentinel.core.id.FlowContext provide();
 
     /**
-     * Provides the owner and session context from the incoming request.
+     * Provides the flow context from the incoming request.
      *
-     * @param request The current {@link HttpServletRequest}.
-     * @return An {@link OwnerContext} containing the flow and owner IDs.
+     * @param ignoredRequest The current {@link HttpServletRequest}.
+     * @return A {@link FlowContext} containing the flow, owner, and partition information.
      */
-    default OwnerContext provide(HttpServletRequest request) {
-        return null;
+    default FlowContext provide(HttpServletRequest ignoredRequest) {
+        return provide();
     }
 }

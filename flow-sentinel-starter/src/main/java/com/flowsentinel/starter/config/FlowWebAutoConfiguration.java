@@ -1,5 +1,6 @@
 package com.flowsentinel.starter.config;
 
+import com.flowsentinel.core.definition.FlowDefinitionProvider;
 import com.flowsentinel.core.engine.FlowEngine;
 import com.flowsentinel.core.parser.FlowDefinitionParser;
 import com.flowsentinel.starter.web.FlowDefinitionRegistry;
@@ -42,9 +43,9 @@ public class FlowWebAutoConfiguration implements WebMvcConfigurer {
     @Bean
     @ConditionalOnMissingBean
     public FlowGuardAspect flowGuardAspect(FlowEngine flowEngine,
-                                           FlowDefinitionRegistry registry,
+                                           FlowDefinitionProvider definitionProvider,
                                            FlowIdProvider flowIdProvider) {
-        return new FlowGuardAspect(flowEngine, registry, flowIdProvider);
+        return new FlowGuardAspect(flowEngine, definitionProvider, flowIdProvider);
     }
 
     @Override
