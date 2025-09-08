@@ -1,16 +1,7 @@
-package com.flowsentinel.core.id;
+package com.flowsentinel.core.context;
 
 import java.util.Objects;
 
-/**
- * Value object representing a unique identifier for a flow.
- * <p>
- * This type is immutable and compares by value. Use {@link #of(String)} to
- * validate and create instances.
- * </p>
- *
- * @author gokalp
- */
 public final class FlowId {
     private final String value;
 
@@ -18,13 +9,6 @@ public final class FlowId {
         this.value = value;
     }
 
-    /**
-     * Creates a new {@code FlowId} after validating the input string.
-     *
-     * @param value the textual identifier
-     * @return a new {@code FlowId}
-     * @throws IllegalArgumentException if the value is null or blank
-     */
     public static FlowId of(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("The flowId cannot be null or blank.");
@@ -32,11 +16,6 @@ public final class FlowId {
         return new FlowId(value);
     }
 
-    /**
-     * Returns the underlying identifier string.
-     *
-     * @return the identifier string
-     */
     public String value() {
         return value;
     }

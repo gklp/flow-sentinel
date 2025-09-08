@@ -2,12 +2,12 @@
 package com.flowsentinel.starter.web;
 
 import com.flowsentinel.core.engine.FlowEngine;
-import com.flowsentinel.core.id.FlowContext;
-import com.flowsentinel.core.id.FlowKey;
+import com.flowsentinel.core.context.FlowContext;
+import com.flowsentinel.core.context.FlowKey;
 import com.flowsentinel.core.runtime.FlowState;
 import com.flowsentinel.starter.web.annotation.Flow;
 import com.flowsentinel.starter.web.annotation.State;
-import com.flowsentinel.starter.web.provider.FlowIdProvider;
+import com.flowsentinel.core.provider.FlowIdProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -36,7 +36,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *     public ResponseEntity<?> processPayment(@State FlowState currentState,
  *                                           @RequestBody PaymentRequest request) {
  *         // Access current flow state directly as method parameter
- *         String currentStep = currentState.currentStep().value();
+ *         String stepId = currentState.stepId().value();
  *         Map<String, Object> attributes = currentState.attributes();
  *
  *         // Process payment based on current state...

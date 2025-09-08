@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
  *
  *     @GetMapping("/current")
  *     public String showCurrentStep(@State FlowState currentState) {
- *         return "You are at: " + currentState.currentStep().id();
+ *         return "You are at: " + currentState.stepId().id();
  *     }
  * }
  * }

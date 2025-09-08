@@ -1,15 +1,10 @@
-package com.flowsentinel.core.id;
+package com.flowsentinel.core.context;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.Objects;
 
-/**
- * Immutable identifier for a step within a flow. Compares by value.
- *
- * @author gokalp
- */
 public final class StepId {
     private final String value;
 
@@ -17,13 +12,6 @@ public final class StepId {
         this.value = value;
     }
 
-    /**
-     * Factory that validates and creates a {@code StepId}.
-     *
-     * @param value the textual step identifier
-     * @return a new {@code StepId}
-     * @throws IllegalArgumentException if the value is null or blank
-     */
     @JsonCreator
     public static StepId of(String value) {
         if (value == null || value.isBlank()) {
@@ -32,11 +20,6 @@ public final class StepId {
         return new StepId(value);
     }
 
-    /**
-     * Returns the underlying identifier string.
-     *
-     * @return the identifier string
-     */
     @JsonValue
     public String value() {
         return value;

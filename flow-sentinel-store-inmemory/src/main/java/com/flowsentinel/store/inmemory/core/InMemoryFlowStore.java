@@ -1,7 +1,7 @@
 package com.flowsentinel.store.inmemory.core;
 
 import com.flowsentinel.core.definition.FlowDefinition;
-import com.flowsentinel.core.id.FlowId;
+import com.flowsentinel.core.context.FlowId;
 import com.flowsentinel.core.runtime.FlowState;
 import com.flowsentinel.core.store.FlowMeta;
 import com.flowsentinel.core.store.FlowSnapshot;

@@ -3,11 +3,11 @@ package com.flowsentinel.starter.web;
 import com.flowsentinel.core.definition.FlowDefinition;
 import com.flowsentinel.core.definition.FlowDefinitionProvider;
 import com.flowsentinel.core.engine.FlowEngine;
-import com.flowsentinel.core.id.FlowContext;
-import com.flowsentinel.core.id.FlowKey;
+import com.flowsentinel.core.context.FlowContext;
+import com.flowsentinel.core.context.FlowKey;
 import com.flowsentinel.starter.web.annotation.Flow;
 import com.flowsentinel.starter.web.annotation.FlowStep;
-import com.flowsentinel.starter.web.provider.FlowIdProvider;
+import com.flowsentinel.core.provider.FlowIdProvider;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -47,7 +47,7 @@ public class FlowGuardAspect {
 
 		Map<String, Object> payload = extractPayloadMap(joinPoint);
 
-		// 1) Preview only (no persist)
+		// Preview only
 		com.flowsentinel.core.runtime.FlowState planned;
 		if (flowStep.start()) {
 			planned = flowEngine.previewStart(flowKey, definition, payload);
@@ -55,10 +55,10 @@ public class FlowGuardAspect {
 			planned = flowEngine.previewAdvance(flowKey, definition, payload);
 		}
 
-		// 2) Execute controller
+		// Execute controller
 		Object result = joinPoint.proceed();
 
-		// 3) Persist if successful
+		// Persist if successful
 		flowEngine.persist(flowKey, planned);
 
 		return result;
@@ -66,11 +66,9 @@ public class FlowGuardAspect {
 
 	private Map<String, Object> extractPayloadMap(ProceedingJoinPoint joinPoint) {
 		Map<String, Object> payload = new HashMap<>();
-
 		Optional<Object> requestBodyOpt = extractRequestBodyPayload(joinPoint);
 		if (requestBodyOpt.isPresent()) {
 			Object requestBodyValue = requestBodyOpt.get();
-
 			if (requestBodyValue instanceof Map<?, ?> map) {
 				map.forEach((k, v) -> {
 					if (k instanceof String key) {
@@ -83,7 +81,6 @@ public class FlowGuardAspect {
 				payload.put(key, requestBodyValue);
 			}
 		}
-
 		return payload;
 	}
 

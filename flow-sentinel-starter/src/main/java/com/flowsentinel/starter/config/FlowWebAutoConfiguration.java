@@ -7,7 +7,7 @@ import com.flowsentinel.starter.web.FlowDefinitionRegistry;
 import com.flowsentinel.starter.web.FlowGuardAspect;
 import com.flowsentinel.starter.web.FlowStateArgumentResolver;
 import com.flowsentinel.starter.web.provider.DefaultFlowIdProvider;
-import com.flowsentinel.starter.web.provider.FlowIdProvider;
+import com.flowsentinel.core.provider.FlowIdProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;

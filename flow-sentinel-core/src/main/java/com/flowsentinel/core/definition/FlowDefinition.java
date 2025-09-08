@@ -2,18 +2,16 @@ package com.flowsentinel.core.definition;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.flowsentinel.core.id.FlowId;
-import com.flowsentinel.core.id.StepId;
+import com.flowsentinel.core.context.FlowId;
+import com.flowsentinel.core.context.StepId;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * Immutable aggregate root describing an entire flow: steps and initial step.
- * Use the builder to construct valid instances.
- *
- * @author gokalp
- */
 public final class FlowDefinition {
     private final FlowId id;
     private final StepId initialStep;
@@ -23,19 +21,11 @@ public final class FlowDefinition {
         this.id = Objects.requireNonNull(b.id, "The id cannot be null.");
         this.initialStep = Objects.requireNonNull(b.initialStep, "The initialStep cannot be null.");
         if (!b.steps.containsKey(b.initialStep)) {
-            throw new IllegalArgumentException("The initial step must be present in the steps map.");
+            throw new IllegalArgumentException("The initial stepId must be present in the steps map.");
         }
         this.steps = Collections.unmodifiableMap(new LinkedHashMap<>(b.steps));
     }
 
-    /**
-     * Constructor for Jackson deserialization.
-     * This creator allows Jackson to construct an instance from a JSON structure where "steps" is an array.
-     *
-     * @param id          The flow identifier.
-     * @param initialStep The identifier of the first step.
-     * @param stepsList   A list of step definitions from the JSON array.
-     */
     @JsonCreator
     public FlowDefinition(
             @JsonProperty("id") FlowId id,
@@ -48,7 +38,7 @@ public final class FlowDefinition {
             throw new IllegalArgumentException("The steps list cannot be null.");
         }
 
-        // Convert list to map, using the step's ID as the key.
+        // Convert a list to map, using the stepId's ID as the key.
         final Map<StepId, StepDefinition> stepsMap = stepsList.stream()
                 .collect(Collectors.toMap(
                         StepDefinition::id,
@@ -58,54 +48,27 @@ public final class FlowDefinition {
                 );
 
         if (!stepsMap.containsKey(this.initialStep)) {
-            throw new IllegalArgumentException("The initial step must be present in the steps map.");
+            throw new IllegalArgumentException("The initial stepId must be present in the steps map.");
         }
         this.steps = Collections.unmodifiableMap(stepsMap);
     }
 
-
-    /**
-     * Returns the flow identifier.
-     *
-     * @return the flow id
-     */
     public FlowId id() {
         return id;
     }
 
-    /**
-     * Returns the initial step identifier.
-     *
-     * @return the initial step id
-     */
     public StepId initialStep() {
         return initialStep;
     }
 
-    /**
-     * Returns all step definitions keyed by their identifier.
-     *
-     * @return immutable map of steps
-     */
     public Map<StepId, StepDefinition> steps() {
         return steps;
     }
 
-    /**
-     * Looks up a step definition by its identifier.
-     *
-     * @param id the step id
-     * @return the step definition, or {@code null} if not found
-     */
     public StepDefinition step(StepId id) {
         return steps.get(id);
     }
 
-    /**
-     * Builder for {@link FlowDefinition}.
-     *
-     * @author gokalp
-     */
     public static class Builder {
         private FlowId id;
         private StepId initialStep;
